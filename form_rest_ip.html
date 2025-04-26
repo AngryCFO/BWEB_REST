@@ -3,46 +3,30 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Определение города по IP-адресу</title>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <title>Определение города по IP</title>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script src="ajax_rest.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        form {
-            margin-bottom: 20px;
-        }
-        input[type="text"] {
-            padding: 8px;
-            width: 250px;
-            margin: 8px 0;
-        }
-        input[type="submit"] {
-            padding: 8px 15px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
         #result {
             margin-top: 20px;
             padding: 15px;
             border: 1px solid #ddd;
-            border-radius: 4px;
+            border-radius: 5px;
             background-color: #f9f9f9;
+        }
+        .info-item {
+            margin-bottom: 8px;
         }
     </style>
 </head>
 <body>
-    <h1>Определение города по IP-адресу</h1>
-    <form action="" method="POST">
-        <strong>Укажите IP<span class="mf-req" style="color: red;">*</span></strong><br>
-        <input type="text" name="ip" id="ip" value="" placeholder="Например: 8.8.8.8"><br>
-        <input type="submit" name="submit" id="submit" value="Определить город">
+    <h2>Определение местоположения по IP</h2>
+    <form id="ipForm">
+        <div>
+            <label for="ip"><strong>Укажите IP-адрес:</strong></label>
+            <input type="text" name="ip" id="ip" placeholder="Например: 77.88.55.88" required>
+        </div>
+        <button type="submit" id="submit">Определить</button>
     </form>
     <div id="result"></div>
 </body>

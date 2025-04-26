@@ -1,59 +1,61 @@
-$(document).ready(function () {
-  $("form").submit(function (event) {
-    // Получаем IP из поля ввода
-    var formData = {
-      query: $("#ip").val(),
-    };
-    
-    // Endpoint API для определения местоположения по IP в Dadata
-    var url = "https://suggestions.dadata.ru/suggestions/api/4_1/rs/iplocate/address?ip=";
-    
-    // API-ключ Dadata
-    var token = "3283c6c1e8a1525d49af2871bfe55b9d59f60a37";
-
-    // Очищаем предыдущий результат
-    $("#result").html("Загрузка...");
-
-    $.ajax({
-      type: "GET",
-      url: url + formData.query,
-      beforeSend: function(xhr) {
-        xhr.setRequestHeader("Authorization", "Token "+ token);
-        // Добавляем заголовок для работы с API Dadata
-        xhr.setRequestHeader("Accept", "application/json");
-      },
-      dataType: "json",
-      encode: true,
-    }).done(function (result) {
-      console.log(result);
+$(document).ready(function() {
+  // Токен и URL API Dadata
+  const API_URL = "https://suggestions.dadata.ru/suggestions/api/4_1/rs/iplocate/address?ip=";
+  const API_TOKEN = "1437ebd34d55ec8ebf3e2274121e4cf060ea80ed";
+  
+  $("#ipForm").submit(function(event) {
+      event.preventDefault();
       
-      // Проверяем наличие данных в ответе
-      if (result && result.location && result.location.data) {
-        // Извлекаем название города из ответа
-        var city = result.location.data.city || "Город не определен";
-        
-        // Выводим название города на страницу
-        $("#result").html("<p><strong>Город:</strong> " + city + "</p>");
-        
-        // Дополнительно можно вывести более подробную информацию
-        var country = result.location.data.country || "";
-        var region = result.location.data.region_with_type || "";
-        
-        if (country || region) {
-          $("#result").append("<p><strong>Страна:</strong> " + country + "</p>");
-          $("#result").append("<p><strong>Регион:</strong> " + region + "</p>");
-        }
-      } else {
-        // Если информация о местоположении не найдена
-        $("#result").html("<p>Не удалось определить местоположение для указанного IP</p>");
+      // Получаем IP из формы
+      const ipAddress = $("#ip").val().trim();
+      
+      // Валидация IP (базовая проверка)
+      if (!ipAddress || !/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(ipAddress)) {
+          $("#result").html('<div class="error">Пожалуйста, введите корректный IP-адрес</div>');
+          return;
       }
-    }).fail(function (jqXHR, textStatus, errorThrown) {
-      // Обработка ошибок запроса
-      console.error("Ошибка запроса:", textStatus, errorThrown);
-      $("#result").html("<p>Ошибка при выполнении запроса. Проверьте консоль браузера для получения дополнительной информации.</p>");
-    });
-
-    // Предотвращаем стандартную отправку формы
-    event.preventDefault();
+      
+      // Показываем загрузку
+      $("#result").html('<div>Определение местоположения...</div>');
+      $("#submit").prop("disabled", true);
+      
+      // Отправляем запрос к API Dadata
+      $.ajax({
+          type: "GET",
+          url: API_URL + ipAddress,
+          beforeSend: function(xhr) {
+              xhr.setRequestHeader("Authorization", "Token " + API_TOKEN);
+          },
+          dataType: "json"
+      })
+      .done(function(response) {
+          console.log("Ответ от API:", response);
+          
+          if (response.location && response.location.data) {
+              const location = response.location.data;
+              let resultHtml = '<div class="info-item"><strong>IP:</strong> ' + ipAddress + '</div>';
+              
+              if (location.city) {
+                  resultHtml += '<div class="info-item"><strong>Город:</strong> ' + location.city + '</div>';
+              }
+              if (location.region) {
+                  resultHtml += '<div class="info-item"><strong>Регион:</strong> ' + location.region + '</div>';
+              }
+              if (location.country) {
+                  resultHtml += '<div class="info-item"><strong>Страна:</strong> ' + location.country + '</div>';
+              }
+              
+              $("#result").html(resultHtml);
+          } else {
+              $("#result").html('<div class="error">Не удалось определить местоположение для данного IP</div>');
+          }
+      })
+      .fail(function(jqXHR, textStatus, errorThrown) {
+          console.error("Ошибка запроса:", textStatus, errorThrown);
+          $("#result").html('<div class="error">Ошибка при запросе к сервису: ' + textStatus + '</div>');
+      })
+      .always(function() {
+          $("#submit").prop("disabled", false);
+      });
   });
 });
